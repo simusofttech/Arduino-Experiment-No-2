@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Arduino Experiment No. 2 - Servo Motor Control</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+            line-height: 1.7;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            background: #2563eb;
+            color: white;
+            text-align: center;
+            padding: 42px 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 34px;
+        }
+
+        .header p {
+            margin: 0;
+            font-size: 17px;
+        }
+
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+
+            padding: 13px 15px;
+
+            background: white;
+            border-bottom: 1px solid #ddd;
+
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #1e3a8a;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #2563eb;
+        }
+
+
+        /* =========================
+           MAIN CONTAINER
+        ========================= */
+
+        .container {
+            width: 90%;
+            max-width: 950px;
+            margin: 35px auto;
+        }
+
+
+        /* =========================
+           SECTION CARDS
+        ========================= */
+
+        .section {
+            background: white;
+            margin-bottom: 24px;
+            padding: 28px;
+
+            border: 1px solid #ddd;
+            border-radius: 10px;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+
+            color: #1e3a8a;
+            font-size: 25px;
+
+            border-bottom: 2px solid #dbeafe;
+            padding-bottom: 8px;
+        }
+
+        .section h3 {
+            color: #1e3a8a;
+            margin-top: 22px;
+        }
+
+        .section p {
+            margin-bottom: 10px;
+        }
+
+
+        /* =========================
+           LISTS
+        ========================= */
+
+        ul,
+        ol {
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 560px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+
+        /* =========================
+           WORKING FLOW
+        ========================= */
+
+        .flow {
+            text-align: center;
+            font-weight: bold;
+            color: #1e3a8a;
+            font-size: 18px;
+            line-height: 2;
+        }
+
+
+        /* =========================
+           CODE
+        ========================= */
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 10px 14px;
+
+            background: #1e293b;
+            color: white;
+
+            border-radius: 8px 8px 0 0;
+        }
+
+        .copy-button {
+            border: 0;
+            padding: 7px 12px;
+
+            background: #2563eb;
+            color: white;
+
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        pre {
+            margin: 0;
+
+            padding: 20px;
+
+            overflow-x: auto;
+
+            background: #020617;
+            color: #e2e8f0;
+
+            border-radius: 0 0 8px 8px;
+
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+
+        /* =========================
+           NOTE
+        ========================= */
+
+        .note {
+            margin-top: 15px;
+
+            padding: 14px;
+
+            background: #eff6ff;
+            border-left: 5px solid #2563eb;
+
+            border-radius: 6px;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            text-align: center;
+
+            padding: 25px 20px;
+
+            background: #0f172a;
+            color: #cbd5e1;
+
+            font-size: 14px;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media(max-width: 600px) {
+
+            .header {
+                padding: 35px 15px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .container {
+                width: 92%;
+            }
+
+            .section {
+                padding: 21px 18px;
+            }
+
+            nav {
+                gap: 11px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header class="header">
+
+        <h1>
+            Arduino Experiment No. 2
+        </h1>
+
+        <p>
+            Servo Motor Control
+        </p>
+
+    </header>
+
+
+    <!-- =========================
+         NAVIGATION
+    ========================= -->
+
+    <nav>
+
+        <a href="#aim">Aim</a>
+
+        <a href="#components">Components</a>
+
+        <a href="#connections">Connections</a>
+
+        <a href="#working">Working</a>
+
+        <a href="#procedure">Procedure</a>
+
+        <a href="#code">Code</a>
+
+        <a href="#output">Output</a>
+
+    </nav>
+
+
+    <main class="container">
+
+
+        <!-- =========================
+             AIM
+        ========================= -->
+
+        <section
+            class="section"
+            id="aim"
+        >
+
+            <h2>Aim</h2>
+
+            <p>
+                To control the angular position of a servo motor
+                using an Arduino and rotate the servo motor to
+                0°, 90° and 180° positions.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             ABOUT
+        ========================= -->
+
+        <section class="section">
+
+            <h2>About the Experiment</h2>
+
+            <p>
+                In this experiment, a servo motor is controlled
+                using an Arduino.
+            </p>
+
+            <p>
+                The servo motor is connected to Arduino digital
+                pin 9. The Arduino sends position commands to
+                move the servo motor to different angles.
+            </p>
+
+            <p>
+                The servo first moves to 0°, then to 90°,
+                and finally to 180°. A delay of one second
+                is provided between each movement.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             COMPONENTS
+        ========================= -->
+
+        <section
+            class="section"
+            id="components"
+        >
+
+            <h2>Components Required</h2>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Component</th>
+                            <th>Quantity</th>
+                            <th>Purpose</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Arduino UNO</td>
+                            <td>1</td>
+                            <td>Main controller</td>
+                        </tr>
+
+                        <tr>
+                            <td>Servo Motor</td>
+                            <td>1</td>
+                            <td>Angular movement</td>
+                        </tr>
+
+                        <tr>
+                            <td>Jumper Wires</td>
+                            <td>As required</td>
+                            <td>Electrical connections</td>
+                        </tr>
+
+                        <tr>
+                            <td>Breadboard</td>
+                            <td>1</td>
+                            <td>For making connections</td>
+                        </tr>
+
+                        <tr>
+                            <td>USB Cable</td>
+                            <td>1</td>
+                            <td>Programming and power</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CONNECTIONS
+        ========================= -->
+
+        <section
+            class="section"
+            id="connections"
+        >
+
+            <h2>Hardware Connections</h2>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Servo Motor Pin</th>
+                            <th>Arduino Connection</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Signal</td>
+                            <td>Digital Pin 9</td>
+                        </tr>
+
+                        <tr>
+                            <td>VCC</td>
+                            <td>5V</td>
+                        </tr>
+
+                        <tr>
+                            <td>GND</td>
+                            <td>GND</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="note">
+                The servo signal wire is connected to Arduino
+                digital pin 9 as used in the program.
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             WORKING
+        ========================= -->
+
+        <section
+            class="section"
+            id="working"
+        >
+
+            <h2>Working Principle</h2>
+
+            <div class="flow">
+
+                Arduino Starts
+
+                <br>
+                ↓
+                <br>
+
+                Servo is attached to Pin 9
+
+                <br>
+                ↓
+                <br>
+
+                Servo moves to 0°
+
+                <br>
+                ↓
+                <br>
+
+                Wait for 1 second
+
+                <br>
+                ↓
+                <br>
+
+                Servo moves to 90°
+
+                <br>
+                ↓
+                <br>
+
+                Wait for 1 second
+
+                <br>
+                ↓
+                <br>
+
+                Servo moves to 180°
+
+                <br>
+                ↓
+                <br>
+
+                Wait for 1 second
+
+                <br>
+                ↓
+                <br>
+
+                Process repeats continuously
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             PROCEDURE
+        ========================= -->
+
+        <section
+            class="section"
+            id="procedure"
+        >
+
+            <h2>Procedure</h2>
+
+            <ol>
+
+                <li>
+                    Connect the Arduino UNO to the computer
+                    using the USB cable.
+                </li>
+
+                <li>
+                    Connect the servo motor signal wire
+                    to Arduino digital pin 9.
+                </li>
+
+                <li>
+                    Connect the servo VCC wire to 5V.
+                </li>
+
+                <li>
+                    Connect the servo GND wire to Arduino GND.
+                </li>
+
+                <li>
+                    Open Arduino IDE.
+                </li>
+
+                <li>
+                    Go to
+                    <strong>Tools → Board</strong>
+                    and select
+                    <strong>Arduino UNO</strong>.
+                </li>
+
+                <li>
+                    Go to
+                    <strong>Tools → Port</strong>
+                    and select the correct COM port.
+                </li>
+
+                <li>
+                    Enter the Servo Motor Control program.
+                </li>
+
+                <li>
+                    Click
+                    <strong>Verify</strong>
+                    to compile the program.
+                </li>
+
+                <li>
+                    Click
+                    <strong>Upload</strong>
+                    to upload the program to the Arduino.
+                </li>
+
+                <li>
+                    Observe the movement of the servo motor.
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <!-- =========================
+             ARDUINO CODE
+        ========================= -->
+
+        <section
+            class="section"
+            id="code"
+        >
+
+            <h2>Arduino Code</h2>
+
+            <div class="code-header">
+
+                <span>
+                    Servo_Motor_Control.ino
+                </span>
+
+                <button
+                    class="copy-button"
+                    onclick="copyCode()"
+                >
+                    Copy Code
+                </button>
+
+            </div>
+
+
+<pre><code id="arduinoCode">#include &lt;Servo.h&gt; // Include Servo library
+
+Servo myservo; // Create servo object
+
+void setup() {
+
+    myservo.attach(9); // Attach servo signal pin to Arduino pin 9
+
+}
+
+void loop() {
+
+    myservo.write(0); // Rotate servo to 0 degree
+
+    delay(1000); // Wait for 1 second
+
+
+    myservo.write(90); // Rotate servo to 90 degree
+
+    delay(1000); // Wait for 1 second
+
+
+    myservo.write(180); // Rotate servo to 180 degree
+
+    delay(1000); // Wait for 1 second
+
+}</code></pre>
+
+        </section>
+
+
+        <!-- =========================
+             CODE EXPLANATION
+        ========================= -->
+
+        <section class="section">
+
+            <h2>Code Explanation</h2>
+
+
+            <h3>
+                #include &lt;Servo.h&gt;
+            </h3>
+
+            <p>
+                Includes the Arduino Servo library required
+                to control the servo motor.
+            </p>
+
+
+            <h3>
+                Servo myservo;
+            </h3>
+
+            <p>
+                Creates a servo object named
+                <strong>myservo</strong>.
+            </p>
+
+
+            <h3>
+                myservo.attach(9);
+            </h3>
+
+            <p>
+                Connects the servo object to Arduino
+                digital pin 9.
+            </p>
+
+
+            <h3>
+                myservo.write(0);
+            </h3>
+
+            <p>
+                Commands the servo motor to move to
+                the 0° position.
+            </p>
+
+
+            <h3>
+                myservo.write(90);
+            </h3>
+
+            <p>
+                Commands the servo motor to move to
+                the 90° position.
+            </p>
+
+
+            <h3>
+                myservo.write(180);
+            </h3>
+
+            <p>
+                Commands the servo motor to move to
+                the 180° position.
+            </p>
+
+
+            <h3>
+                delay(1000);
+            </h3>
+
+            <p>
+                Pauses the program for 1000 milliseconds,
+                which is equal to 1 second.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             OUTPUT
+        ========================= -->
+
+        <section
+            class="section"
+            id="output"
+        >
+
+            <h2>Expected Output</h2>
+
+            <ul>
+
+                <li>
+                    Servo motor moves to 0°.
+                </li>
+
+                <li>
+                    Servo remains at 0° for 1 second.
+                </li>
+
+                <li>
+                    Servo motor moves to 90°.
+                </li>
+
+                <li>
+                    Servo remains at 90° for 1 second.
+                </li>
+
+                <li>
+                    Servo motor moves to 180°.
+                </li>
+
+                <li>
+                    Servo remains at 180° for 1 second.
+                </li>
+
+                <li>
+                    The sequence repeats continuously.
+                </li>
+
+            </ul>
+
+        </section>
+
+
+        <!-- =========================
+             RESULT
+        ========================= -->
+
+        <section class="section">
+
+            <h2>Result</h2>
+
+            <p>
+                The servo motor angle control experiment was
+                successfully implemented using Arduino.
+                The servo motor moves to 0°, 90° and 180°
+                with a delay of one second between each position.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             LEARNING
+        ========================= -->
+
+        <section class="section">
+
+            <h2>What You Learn</h2>
+
+            <ul>
+
+                <li>
+                    Basic interfacing of a servo motor with Arduino.
+                </li>
+
+                <li>
+                    How to use the Arduino Servo library.
+                </li>
+
+                <li>
+                    How to create a Servo object.
+                </li>
+
+                <li>
+                    How to attach a servo motor to a digital pin.
+                </li>
+
+                <li>
+                    How to control the angular position of a servo.
+                </li>
+
+                <li>
+                    How to use delays between servo movements.
+                </li>
+
+            </ul>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        <strong>
+            Arduino Experiment No. 2
+        </strong>
+
+        <br>
+
+        Servo Motor Control
+
+    </footer>
+
+
+    <!-- =========================
+         COPY CODE SCRIPT
+    ========================= -->
+
+    <script>
+
+        function copyCode() {
+
+            const code =
+                document
+                .getElementById("arduinoCode")
+                .innerText;
+
+            navigator.clipboard
+                .writeText(code);
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
