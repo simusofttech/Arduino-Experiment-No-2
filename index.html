@@ -52,7 +52,7 @@
         tr:nth-child(even) { background: #f8fafc; }
 
         /* =========================
-           COMPONENT GRID (Added for Image Layout)
+           COMPONENT GRID (WITH IMAGE FIX)
         ========================= */
         .components-grid {
             display: grid;
@@ -68,16 +68,24 @@
             background: #fff;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             transition: box-shadow 0.2s, transform 0.2s;
+            
+            /* Prevents large images from breaking the grid column width */
+            min-width: 0; 
+            overflow: hidden; 
         }
         .component-card:hover {
             box-shadow: 0 6px 15px rgba(0,0,0,0.08);
             transform: translateY(-2px);
         }
-        .component-card  {
+        .component-card img {
             width: 100%;
+            max-width: 100%; /* Forces image to never exceed the card width */
             height: 120px;
             object-fit: contain;
-            margin-bottom: 15px;
+            
+            /* Centers the image properly and prevents inline spacing bugs */
+            margin: 0 auto 15px auto; 
+            display: block; 
         }
         .component-card h4 {
             color: #1e3a8a;
